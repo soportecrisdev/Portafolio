@@ -1,5 +1,5 @@
 // ======================================
-// MAIN JAVASCRIPT FILE
+// MAIN JAVASCRIPT FILE - VERSIÓN CORREGIDA
 // ======================================
 
 // DOM Content Loaded Event
@@ -14,8 +14,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load projects from JSON
     loadProjects();
     
-    // Initialize animations
-    initializeAnimations();
+    // Initialize animations with delay to prevent flickering
+    setTimeout(() => {
+        initializeAnimations();
+    }, 100);
 });
 
 // Mobile menu functionality
@@ -60,40 +62,53 @@ if (menuToggle && navMenu) {
     });
 }
 
-// Update active nav link on scroll
+// Update active nav link on scroll (OPTIMIZADO)
+let ticking = false;
 function updateActiveNavLink() {
-    const sections = document.querySelectorAll('section[id]');
-    const scrollPos = window.scrollY + 100; // Offset for header height
-    
-    sections.forEach(section => {
-        const sectionTop = section.offsetTop;
-        const sectionHeight = section.offsetHeight;
-        const sectionId = section.getAttribute('id');
-        
-        if (scrollPos >= sectionTop && scrollPos < sectionTop + sectionHeight) {
-            navLinks.forEach(link => {
-                link.classList.remove('active');
-                if (link.getAttribute('href') === `#${sectionId}`) {
-                    link.classList.add('active');
+    if (!ticking) {
+        requestAnimationFrame(() => {
+            const sections = document.querySelectorAll('section[id]');
+            const scrollPos = window.scrollY + 150;
+            
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.offsetHeight;
+                const sectionId = section.getAttribute('id');
+                
+                if (scrollPos >= sectionTop && scrollPos < sectionTop + sectionHeight) {
+                    navLinks.forEach(link => {
+                        link.classList.remove('active');
+                        if (link.getAttribute('href') === `#${sectionId}`) {
+                            link.classList.add('active');
+                        }
+                    });
                 }
             });
-        }
-    });
+            ticking = false;
+        });
+        ticking = true;
+    }
 }
 
-// Header background on scroll
+// Header background on scroll (OPTIMIZADO)
+let headerTicking = false;
 window.addEventListener('scroll', function() {
-    const header = document.querySelector('header');
-    if (header) {
-        if (window.scrollY > 100) {
-            header.style.background = 'rgba(255, 255, 255, 0.98)';
-        } else {
-            header.style.background = 'rgba(255, 255, 255, 0.95)';
-        }
+    if (!headerTicking) {
+        requestAnimationFrame(() => {
+            const header = document.querySelector('header');
+            if (header) {
+                if (window.scrollY > 100) {
+                    header.style.background = 'rgba(255, 255, 255, 0.98)';
+                } else {
+                    header.style.background = 'rgba(255, 255, 255, 0.95)';
+                }
+            }
+            
+            updateActiveNavLink();
+            headerTicking = false;
+        });
+        headerTicking = true;
     }
-    
-    // Update active nav link
-    updateActiveNavLink();
 });
 
 // Smooth scrolling for navigation links
@@ -116,7 +131,6 @@ async function loadProjects() {
         const response = await fetch('projects/data.json');
         
         if (!response.ok) {
-            // If JSON file doesn't exist, create default projects
             createDefaultProjects();
             return;
         }
@@ -174,7 +188,7 @@ function renderProjects(projects) {
         
         projectCard.innerHTML = `
             <div class="project-image">
-                <img src="${project.imagen}" alt="${project.titulo}" onerror="this.src='img/placeholder-project.jpg'">
+                <img src="${project.imagen}" alt="${project.titulo}" onerror="this.src='https://via.placeholder.com/600x400/3498db/ffffff?text=Proyecto'">
             </div>
             <div class="project-info">
                 <h3>${project.titulo}</h3>
@@ -195,25 +209,28 @@ function renderProjects(projects) {
     });
 }
 
-// Form handling with multiple submission options
+// ==========================================
+// FORMULARIO DE CONTACTO - CORREGIDO
+// ==========================================
+
 const contactForm = document.getElementById('contactForm');
 if (contactForm) {
     contactForm.addEventListener('submit', function(e) {
         e.preventDefault();
         
-        // Get form data
+        // Obtener datos del formulario
         const formData = new FormData(this);
         const nombre = formData.get('nombre');
         const email = formData.get('email');
         const mensaje = formData.get('mensaje');
         
-        // Validation function
+        // Función de validación
         function validarEmail(email) {
             const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             return re.test(email);
         }
         
-        // Comprehensive validation
+        // Validación completa
         const errores = [];
         
         if (!nombre || nombre.trim().length < 2) {
@@ -228,70 +245,31 @@ if (contactForm) {
             errores.push('El mensaje debe tener al menos 10 caracteres');
         }
         
-        // Show errors if any
+        // Mostrar errores si existen
         if (errores.length > 0) {
             mostrarMensaje('error', errores.join('. '));
             return;
         }
         
-        // Prepare form submission
+        // Preparar el botón
         const submitBtn = this.querySelector('.btn-submit');
         const originalText = submitBtn.innerHTML;
         
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
         submitBtn.disabled = true;
         
-        // Option 1: EmailJS (recommended for static sites)
-        if (typeof emailjs !== 'undefined') {
-            enviarConEmailJS(nombre, email, mensaje, submitBtn, originalText, this);
-        } 
-        // Option 2: Formspree (alternative service)
-        else if (this.hasAttribute('data-formspree')) {
-            enviarConFormspree(this, submitBtn, originalText);
-        }
-        // Option 3: Netlify Forms (if hosted on Netlify)
-        else if (this.hasAttribute('data-netlify')) {
-            enviarConNetlify(this, submitBtn, originalText);
-        }
-        // Option 4: mailto fallback
-        else {
-            enviarConMailto(nombre, email, mensaje, submitBtn, originalText, this);
-        }
+        // USAR FORMSPREE (ya configurado en tu HTML)
+        enviarConFormspree(this, submitBtn, originalText);
     });
 }
 
-// EmailJS implementation
-function enviarConEmailJS(nombre, email, mensaje, submitBtn, originalText, form) {
-    // Replace with your EmailJS service ID, template ID, and user ID
-    const serviceID = 'service_aq8x4tc';        // El que viste en pantalla
-    const templateID = 'template_XXXXXXX';      // El que obtengas del template
-    const userID = 'TU_PUBLIC_KEY_AQUI';        // El Public Key de tu cuenta
-    
-    const templateParams = {
-        from_name: nombre,
-        from_email: email,
-        message: mensaje,
-        to_name: 'Cristian Batero'
-    };
-    
-    emailjs.send(serviceID, templateID, templateParams, userID)
-        .then(function(response) {
-            mostrarMensaje('success', '¡Mensaje enviado correctamente! Te contactaré pronto.');
-            form.reset();
-        }, function(error) {
-            mostrarMensaje('error', 'Hubo un problema al enviar el mensaje. Por favor intenta nuevamente.');
-        })
-        .finally(function() {
-            submitBtn.innerHTML = originalText;
-            submitBtn.disabled = false;
-        });
-}
-
-// Formspree implementation
+// Implementación de Formspree (CORREGIDA)
 function enviarConFormspree(form, submitBtn, originalText) {
+    const formData = new FormData(form);
+    
     fetch(form.action, {
         method: 'POST',
-        body: new FormData(form),
+        body: formData,
         headers: {
             'Accept': 'application/json'
         }
@@ -300,9 +278,16 @@ function enviarConFormspree(form, submitBtn, originalText) {
             mostrarMensaje('success', '¡Mensaje enviado correctamente! Te contactaré pronto.');
             form.reset();
         } else {
-            mostrarMensaje('error', 'Hubo un problema al enviar el mensaje. Por favor intenta nuevamente.');
+            return response.json().then(data => {
+                if (data.errors) {
+                    mostrarMensaje('error', 'Error en el formulario: ' + data.errors.map(error => error.message).join(', '));
+                } else {
+                    mostrarMensaje('error', 'Hubo un problema al enviar el mensaje. Por favor intenta nuevamente.');
+                }
+            });
         }
     }).catch(function(error) {
+        console.error('Error:', error);
         mostrarMensaje('error', 'Error de conexión. Por favor verifica tu internet e intenta nuevamente.');
     }).finally(function() {
         submitBtn.innerHTML = originalText;
@@ -310,60 +295,15 @@ function enviarConFormspree(form, submitBtn, originalText) {
     });
 }
 
-// Netlify Forms implementation
-function enviarConNetlify(form, submitBtn, originalText) {
-    fetch('/', {
-        method: 'POST',
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams(new FormData(form)).toString()
-    }).then(function(response) {
-        if (response.ok) {
-            mostrarMensaje('success', '¡Mensaje enviado correctamente! Te contactaré pronto.');
-            form.reset();
-        } else {
-            mostrarMensaje('error', 'Hubo un problema al enviar el mensaje. Por favor intenta nuevamente.');
-        }
-    }).catch(function(error) {
-        mostrarMensaje('error', 'Error de conexión. Por favor verifica tu internet e intenta nuevamente.');
-    }).finally(function() {
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
-    });
-}
-
-// Mailto fallback
-function enviarConMailto(nombre, email, mensaje, submitBtn, originalText, form) {
-    const asunto = encodeURIComponent('Mensaje desde tu portafolio');
-    const cuerpo = encodeURIComponent(`
-Nombre: ${nombre}
-Email: ${email}
-
-Mensaje:
-${mensaje}
-    `);
-    
-    const mailtoLink = `mailto:cristianbatero18@gmail.com?subject=${asunto}&body=${cuerpo}`;
-    
-    // Open mailto link
-    window.location.href = mailtoLink;
-    
-    setTimeout(() => {
-        mostrarMensaje('info', 'Se ha abierto tu cliente de correo. Si no se abrió automáticamente, puedes contactarme directamente a cristianbatero18@gmail.com');
-        form.reset();
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
-    }, 1000);
-}
-
-// Message display function
+// Función para mostrar mensajes
 function mostrarMensaje(tipo, texto) {
-    // Remove existing messages
+    // Remover mensajes existentes
     const existingMessage = document.querySelector('.form-message');
     if (existingMessage) {
         existingMessage.remove();
     }
     
-    // Create new message
+    // Crear nuevo mensaje
     const messageDiv = document.createElement('div');
     messageDiv.className = `form-message ${tipo}`;
     messageDiv.innerHTML = `
@@ -374,13 +314,13 @@ function mostrarMensaje(tipo, texto) {
         </div>
     `;
     
-    // Insert message before form
+    // Insertar mensaje antes del formulario
     const form = document.getElementById('contactForm');
     if (form) {
         form.parentNode.insertBefore(messageDiv, form);
     }
     
-    // Auto remove after 5 seconds
+    // Auto remover después de 5 segundos
     setTimeout(() => {
         if (messageDiv.parentNode) {
             messageDiv.remove();
@@ -388,20 +328,98 @@ function mostrarMensaje(tipo, texto) {
     }, 5000);
 }
 
-// Skill bars animation on scroll
-function animateSkillBars() {
-    const skillBars = document.querySelectorAll('.skill-progress');
-    const skillsSection = document.getElementById('habilidades');
-    
-    if (skillsSection && isElementInViewport(skillsSection)) {
-        skillBars.forEach(bar => {
-            const width = bar.style.width;
-            bar.style.width = '0%';
+// ==========================================
+// DESCARGA DE CV - MEJORADA
+// ==========================================
+
+// Mejorar funcionalidad de descarga de CV
+document.addEventListener('DOMContentLoaded', function() {
+    const cvButton = document.querySelector('.btn-download');
+    if (cvButton) {
+        cvButton.addEventListener('click', function(e) {
+            // Verificar si el archivo existe
+            const cvPath = 'downloads/cv.pdf';
+            
+            // Crear enlace temporal para descarga
+            const link = document.createElement('a');
+            link.href = cvPath;
+            link.download = 'CV_Cristian_Batero.pdf';
+            
+            // Mostrar mensaje de descarga
             setTimeout(() => {
-                bar.style.width = width;
-            }, 500);
+                mostrarMensajeCV('info', 'Descargando CV... Si no se descarga automáticamente, haz clic derecho y selecciona "Guardar como"');
+            }, 100);
+            
+            // Agregar al DOM, hacer clic y remover
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Tracking de descarga (opcional)
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'download', {
+                    event_category: 'CV',
+                    event_label: 'CV_Cristian_Batero.pdf'
+                });
+            }
         });
     }
+});
+
+// Función para mostrar mensajes de CV
+function mostrarMensajeCV(tipo, texto) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `cv-message ${tipo}`;
+    messageDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${tipo === 'success' ? '#d4edda' : tipo === 'error' ? '#f8d7da' : '#d1ecf1'};
+        color: ${tipo === 'success' ? '#155724' : tipo === 'error' ? '#721c24' : '#0c5460'};
+        padding: 1rem;
+        border-radius: 5px;
+        border-left: 4px solid ${tipo === 'success' ? '#28a745' : tipo === 'error' ? '#dc3545' : '#17a2b8'};
+        z-index: 10000;
+        animation: slideInRight 0.3s ease;
+        max-width: 300px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    `;
+    
+    messageDiv.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas ${tipo === 'success' ? 'fa-check-circle' : tipo === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+            <span>${texto}</span>
+            <button onclick="this.parentElement.parentElement.remove()" style="margin-left: auto; background: none; border: none; font-size: 1.2rem; cursor: pointer;">×</button>
+        </div>
+    `;
+    
+    document.body.appendChild(messageDiv);
+    
+    // Auto remover después de 4 segundos
+    setTimeout(() => {
+        if (messageDiv.parentNode) {
+            messageDiv.remove();
+        }
+    }, 4000);
+}
+
+// Skill bars animation (MEJORADA - sin parpadeo)
+function animateSkillBars() {
+    const skillBars = document.querySelectorAll('.skill-progress');
+    
+    skillBars.forEach((bar, index) => {
+        if (!bar.classList.contains('animated')) {
+            const width = bar.style.width;
+            bar.style.width = '0%';
+            bar.style.transition = 'none';
+            
+            setTimeout(() => {
+                bar.style.transition = 'width 2s ease';
+                bar.style.width = width;
+                bar.classList.add('animated');
+            }, index * 200);
+        }
+    });
 }
 
 // Check if element is in viewport
@@ -415,108 +433,53 @@ function isElementInViewport(el) {
     );
 }
 
-// Initialize animations
+// Initialize animations (VERSIÓN MEJORADA - sin parpadeo)
 function initializeAnimations() {
-    // Intersection Observer for animations
+    const animatedElements = new Set();
+    
     const observerOptions = {
-        threshold: 0.1,
+        threshold: 0.2,
         rootMargin: '0px 0px -50px 0px'
     };
 
     const observer = new IntersectionObserver(function(entries) {
         entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('animate__animated', 'animate__fadeInUp');
+            const element = entry.target;
+            
+            if (entry.isIntersecting && !animatedElements.has(element)) {
+                animatedElements.add(element);
                 
-                // Animate skill bars when skills section comes into view
-                if (entry.target.id === 'habilidades') {
+                setTimeout(() => {
+                    element.classList.add('animate__animated', 'animate__fadeInUp');
+                }, 100);
+                
+                if (element.id === 'habilidades') {
                     setTimeout(() => {
                         animateSkillBars();
-                    }, 300);
+                    }, 500);
                 }
+                
+                observer.unobserve(element);
             }
         });
     }, observerOptions);
 
-    // Observe elements for animation
-    const elementsToAnimate = document.querySelectorAll('.skill, .project-card, .timeline-item, section');
-    elementsToAnimate.forEach(el => observer.observe(el));
-}
-
-// Utility functions
-const utils = {
-    // Debounce function for performance
-    debounce: function(func, wait, immediate) {
-        let timeout;
-        return function executedFunction() {
-            const context = this;
-            const args = arguments;
-            const later = function() {
-                timeout = null;
-                if (!immediate) func.apply(context, args);
-            };
-            const callNow = immediate && !timeout;
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-            if (callNow) func.apply(context, args);
-        };
-    },
-
-    // Throttle function for scroll events
-    throttle: function(func, limit) {
-        let inThrottle;
-        return function() {
-            const args = arguments;
-            const context = this;
-            if (!inThrottle) {
-                func.apply(context, args);
-                inThrottle = true;
-                setTimeout(() => inThrottle = false, limit);
-            }
-        };
-    },
-
-    // Format date function
-    formatDate: function(date) {
-        const options = { year: 'numeric', month: 'long', day: 'numeric' };
-        return new Date(date).toLocaleDateString('es-ES', options);
-    },
-
-    // Lazy loading for images
-    lazyLoadImages: function() {
-        const images = document.querySelectorAll('img[data-src]');
-        const imageObserver = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const img = entry.target;
-                    img.src = img.dataset.src;
-                    img.classList.remove('lazy');
-                    imageObserver.unobserve(img);
-                }
-            });
-        });
-
-        images.forEach(img => imageObserver.observe(img));
-    }
-};
-
-// Performance optimizations
-const optimizedScroll = utils.throttle(function() {
-    updateActiveNavLink();
-    
-    const header = document.querySelector('header');
-    if (header) {
-        if (window.scrollY > 100) {
-            header.style.background = 'rgba(255, 255, 255, 0.98)';
+    const elementsToAnimate = document.querySelectorAll('.skill, .project-card, .timeline-item, section[id]');
+    elementsToAnimate.forEach(el => {
+        if (!isElementInViewport(el)) {
+            observer.observe(el);
         } else {
-            header.style.background = 'rgba(255, 255, 255, 0.95)';
+            el.classList.add('animate__animated', 'animate__fadeInUp');
+            animatedElements.add(el);
+            
+            if (el.id === 'habilidades') {
+                setTimeout(() => {
+                    animateSkillBars();
+                }, 300);
+            }
         }
-    }
-}, 100);
-
-// Replace the existing scroll event listener
-window.removeEventListener('scroll', window.addEventListener);
-window.addEventListener('scroll', optimizedScroll);
+    });
+}
 
 // Error handling for missing images
 document.addEventListener('DOMContentLoaded', function() {
@@ -524,11 +487,11 @@ document.addEventListener('DOMContentLoaded', function() {
     images.forEach(img => {
         img.addEventListener('error', function() {
             if (this.src.includes('proyecto')) {
-                this.src = 'img/placeholder-project.jpg';
+                this.src = 'https://via.placeholder.com/600x400/3498db/ffffff?text=Proyecto';
             } else if (this.src.includes('avatar')) {
-                this.src = 'img/placeholder-avatar.png';
+                this.src = 'https://ui-avatars.com/api/?name=Cristian+Batero&size=300&background=3498db&color=fff';
             } else {
-                this.src = 'img/placeholder.jpg';
+                this.src = 'https://via.placeholder.com/300x200/ecf0f1/333333?text=Imagen';
             }
         });
     });
@@ -536,7 +499,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Keyboard navigation support
 document.addEventListener('keydown', function(e) {
-    // Close mobile menu with Escape key
     if (e.key === 'Escape') {
         const menuToggle = document.getElementById('menuToggle');
         const navMenu = document.getElementById('navMenu');
@@ -545,75 +507,6 @@ document.addEventListener('keydown', function(e) {
             navMenu.classList.remove('active');
             document.body.style.overflow = 'auto';
         }
-    }
-});
-
-// Focus management for accessibility
-function manageFocus() {
-    const focusableElements = document.querySelectorAll(
-        'a[href], button, textarea, input[type="text"], input[type="radio"], input[type="checkbox"], select'
-    );
-    
-    const firstFocusable = focusableElements[0];
-    const lastFocusable = focusableElements[focusableElements.length - 1];
-    
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Tab') {
-            if (e.shiftKey) {
-                if (document.activeElement === firstFocusable) {
-                    lastFocusable.focus();
-                    e.preventDefault();
-                }
-            } else {
-                if (document.activeElement === lastFocusable) {
-                    firstFocusable.focus();
-                    e.preventDefault();
-                }
-            }
-        }
-    });
-}
-
-// Initialize focus management
-manageFocus();
-
-// Service Worker registration for PWA support (optional)
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js')
-        .then(function(registration) {
-            console.log('ServiceWorker registration successful');
-        })
-        .catch(function(error) {
-            console.log('ServiceWorker registration failed');
-        });
-    });
-}
-
-// Analytics event tracking (Google Analytics example)
-function trackEvent(eventName, parameters = {}) {
-    if (typeof gtag !== 'undefined') {
-        gtag('event', eventName, parameters);
-    }
-}
-
-// Track form submissions
-const form = document.getElementById('contactForm');
-if (form) {
-    form.addEventListener('submit', function() {
-        trackEvent('form_submit', {
-            form_name: 'contact_form'
-        });
-    });
-}
-
-// Track external link clicks
-document.addEventListener('click', function(e) {
-    if (e.target.tagName === 'A' && e.target.target === '_blank') {
-        trackEvent('external_link_click', {
-            link_url: e.target.href,
-            link_text: e.target.textContent.trim()
-        });
     }
 });
 
@@ -632,6 +525,5 @@ window.PortfolioApp = {
     updateActiveNavLink,
     mostrarMensaje,
     animateSkillBars,
-    loadProjects,
-    utils
+    loadProjects
 };
