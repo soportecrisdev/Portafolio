@@ -1,4 +1,5 @@
 <?php
+// contact.php - Procesamiento del formulario de contacto
 // Iniciar sesión
 session_start();
 

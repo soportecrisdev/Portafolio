@@ -1,26 +1,9 @@
-<?php
-// Inicio de sesión para posibles funcionalidades futuras
-session_start();
-
-// Cargar datos de proyectos desde JSON
-$projectsData = file_get_contents('projects/data.json');
-$projects = json_decode($projectsData, true);
-
-// Variables para información personal
-$nombre = "Cristian Batero";
-$ciudad = "Cali, Colombia";
-$carrera = "Ingeniería en Sistemas";
-$slogan = "Desarrollador junior con visión de futuro";
-$edad = "23";
-$email = "cristianbatero18@gmail.com";
-?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $nombre; ?> - Portafolio</title>
+    <title>Cristian Batero - Portafolio</title>
     
     <!-- Favicon -->
     <link rel="shortcut icon" href="img/favicon.ico" type="image/x-icon">
@@ -37,25 +20,55 @@ $email = "cristianbatero18@gmail.com";
     
     <!-- Typed.js para animación de tipeo -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.12/typed.min.js"></script>
+    
+    <!-- EmailJS SDK (opcional - descomenta si quieres usar EmailJS) -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script> -->
+    <!-- <script>emailjs.init('YOUR_PUBLIC_KEY');</script> -->
 </head>
 <body>
     <!-- Cabecera -->
-    <?php include 'includes/header.php'; ?>
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <a href="#hero">Cristian Batero</a>
+            </div>
+            
+            <div class="menu-toggle" id="menuToggle">
+                <i class="fas fa-bars"></i>
+            </div>
+            
+            <ul class="nav-menu" id="navMenu">
+                <li class="nav-item">
+                    <a href="#hero" class="nav-link active">Inicio</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#sobre-mi" class="nav-link">Sobre Mí</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#habilidades" class="nav-link">Habilidades</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#proyectos" class="nav-link">Proyectos</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#experiencia" class="nav-link">Experiencia</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#contacto" class="nav-link">Contacto</a>
+                </li>
+            </ul>
+        </div>
+    </header>
     
     <!-- Sección Hero (Inicio) -->
     <section id="hero" class="hero-section">
         <div class="hero-content">
             <div class="hero-text">
-                <h1 class="animate__animated animate__fadeInDown"><?php echo $nombre; ?></h1>
-                <h2 class="animate__animated animate__fadeInUp"><?php echo $ciudad; ?> | <?php echo $carrera; ?></h2>
-                <p class="slogan animate__animated animate__fadeIn"><?php echo $slogan; ?></p>
+                <h1 class="animate__animated animate__fadeInDown">Cristian Batero</h1>
+                <h2 class="animate__animated animate__fadeInUp">Cali, Colombia | Ingeniería en Sistemas</h2>
+                <p class="slogan animate__animated animate__fadeIn">Desarrollador junior con visión de futuro</p>
                 
                 <div class="typed-container">
-                    <span id="typed-strings">
-                        <span>Java</span>
-                        <span>Python</span>
-                        <span>Web</span>
-                    </span>
                     <span id="typed" class="typed"></span>
                 </div>
                 
@@ -65,7 +78,7 @@ $email = "cristianbatero18@gmail.com";
             </div>
             
             <div class="hero-image animate__animated animate__fadeIn">
-                <img src="img/avatar.png" alt="<?php echo $nombre; ?>">
+                <img src="img/avatar.png" alt="Cristian Batero">
             </div>
         </div>
     </section>
@@ -77,9 +90,9 @@ $email = "cristianbatero18@gmail.com";
             
             <div class="about-content">
                 <div class="about-info">
-                    <p><strong>Edad:</strong> <?php echo $edad; ?> años</p>
-                    <p><strong>Carrera:</strong> <?php echo $carrera; ?></p>
-                    <p><strong>Ciudad:</strong> <?php echo $ciudad; ?></p>
+                    <p><strong>Edad:</strong> 23 años</p>
+                    <p><strong>Carrera:</strong> Ingeniería en Sistemas</p>
+                    <p><strong>Ciudad:</strong> Cali, Colombia</p>
                 </div>
                 
                 <div class="about-story">
@@ -197,8 +210,6 @@ $email = "cristianbatero18@gmail.com";
                     </div>
                     <span class="skill-percentage">60%</span>
                 </div>
-                
-                <!-- Puedes agregar más habilidades aquí -->
             </div>
         </div>
     </section>
@@ -208,37 +219,8 @@ $email = "cristianbatero18@gmail.com";
         <div class="section-container">
             <h2 class="section-title">Proyectos</h2>
             
-            <div class="projects-container">
-                <?php foreach ($projects as $project): ?>
-                <div class="project-card">
-                    <div class="project-image">
-                        <img src="<?php echo $project['imagen']; ?>" alt="<?php echo $project['titulo']; ?>">
-                    </div>
-                    
-                    <div class="project-info">
-                        <h3><?php echo $project['titulo']; ?></h3>
-                        <p><?php echo $project['descripcion']; ?></p>
-                        
-                        <div class="project-tech">
-                            <?php foreach ($project['tecnologias'] as $tech): ?>
-                            <span class="tech-badge"><?php echo $tech; ?></span>
-                            <?php endforeach; ?>
-                        </div>
-                        
-                        <?php if (!empty($project['demo'])): ?>
-                        <a href="<?php echo $project['demo']; ?>" class="btn-demo" target="_blank">
-                            <i class="fas fa-external-link-alt"></i> Ver Demo
-                        </a>
-                        <?php endif; ?>
-                        
-                        <?php if (!empty($project['repositorio'])): ?>
-                        <a href="<?php echo $project['repositorio']; ?>" class="btn-repo" target="_blank">
-                            <i class="fab fa-github"></i> Repositorio
-                        </a>
-                        <?php endif; ?>
-                    </div>
-                </div>
-                <?php endforeach; ?>
+            <div class="projects-container" id="projectsContainer">
+                <!-- Los proyectos se cargarán dinámicamente desde projects/data.json -->
             </div>
         </div>
     </section>
@@ -253,12 +235,12 @@ $email = "cristianbatero18@gmail.com";
                 <div class="timeline-item">
                     <div class="timeline-marker"></div>
                     <div class="timeline-content">
-                        <h3>Infraestructura de Datos</h3>
+                        <h3>Infraestructura de Datos de Internet</h3>
                         <p class="timeline-date">2023 - Presente</p>
-                        <p class="timeline-company">Nombre de la Empresa</p>
+                        <p class="timeline-company">Empresa Actual</p>
                         <p class="timeline-description">
-                            <!-- Modifica con tu experiencia actual -->
-                            Responsable de... [Describe tus responsabilidades y logros]
+                            Responsable del mantenimiento y optimización de la infraestructura de datos, 
+                            implementación de soluciones automatizadas y soporte técnico especializado.
                         </p>
                     </div>
                 </div>
@@ -269,15 +251,13 @@ $email = "cristianbatero18@gmail.com";
                     <div class="timeline-content">
                         <h3>Soporte TI</h3>
                         <p class="timeline-date">2021 - 2023</p>
-                        <p class="timeline-company">Nombre de la Empresa</p>
+                        <p class="timeline-company">Empresa Anterior</p>
                         <p class="timeline-description">
-                            <!-- Modifica con tu experiencia previa -->
-                            Encargado de... [Describe tus responsabilidades y logros]
+                            Encargado del soporte técnico a usuarios, resolución de incidencias, 
+                            mantenimiento de equipos y implementación de mejoras en sistemas.
                         </p>
                     </div>
                 </div>
-                
-                <!-- Puedes agregar más experiencias aquí -->
             </div>
         </div>
     </section>
@@ -297,17 +277,33 @@ $email = "cristianbatero18@gmail.com";
                     <div class="contact-details">
                         <div class="contact-item">
                             <i class="fas fa-envelope"></i>
-                            <span><?php echo $email; ?></span>
+                            <span>cristianbatero18@gmail.com</span>
                         </div>
                         <div class="contact-item">
                             <i class="fas fa-map-marker-alt"></i>
-                            <span><?php echo $ciudad; ?></span>
+                            <span>Cali, Colombia</span>
                         </div>
                     </div>
                 </div>
                 
                 <div class="contact-form">
-                    <form id="contactForm" action="includes/contact.php" method="POST">
+                    <!-- Form with multiple service options -->
+                    <form id="contactForm" 
+                          action="https://formspree.io/f/YOUR_FORM_ID" 
+                          method="POST"
+                          data-formspree="true"
+                          data-netlify="true" 
+                          netlify-honeypot="bot-field">
+                        
+                        <!-- Netlify bot field (hidden) -->
+                        <input type="hidden" name="form-name" value="contact">
+                        <div class="honeypot">
+                            <label>Don't fill this out if you're human: <input name="bot-field"></label>
+                        </div>
+                        
+                        <!-- Regular honeypot field for other services -->
+                        <input type="text" name="honeypot" class="honeypot" tabindex="-1" autocomplete="off">
+                        
                         <div class="form-group">
                             <label for="nombre">Nombre</label>
                             <input type="text" id="nombre" name="nombre" required>
@@ -323,9 +319,6 @@ $email = "cristianbatero18@gmail.com";
                             <textarea id="mensaje" name="mensaje" rows="5" required></textarea>
                         </div>
                         
-                        <!-- Campo oculto para protección contra bots -->
-                        <input type="hidden" name="honeypot" id="honeypot" value="">
-                        
                         <div class="form-group">
                             <button type="submit" class="btn-submit">
                                 <i class="fas fa-paper-plane"></i> Enviar Mensaje
@@ -338,7 +331,25 @@ $email = "cristianbatero18@gmail.com";
     </section>
     
     <!-- Pie de página -->
-    <?php include 'includes/footer.php'; ?>
+    <footer>
+        <div class="footer-container">
+            <div class="social-icons">
+                <a href="https://github.com/CristianBatero" target="_blank" class="social-icon" title="GitHub">
+                    <i class="fab fa-github"></i>
+                </a>
+                <a href="https://www.linkedin.com/in/cristian-andres-824742361/" target="_blank" class="social-icon" title="LinkedIn">
+                    <i class="fab fa-linkedin"></i>
+                </a>
+                <a href="mailto:cristianbatero18@gmail.com" class="social-icon" title="Email">
+                    <i class="fas fa-envelope"></i>
+                </a>
+            </div>
+            
+            <div class="copyright">
+                &copy; <span id="currentYear"></span> Cristian Batero. Todos los derechos reservados.
+            </div>
+        </div>
+    </footer>
     
     <!-- Scripts JavaScript -->
     <script src="js/main.js"></script>

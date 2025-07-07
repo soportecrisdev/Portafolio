@@ -1,4 +1,5 @@
 <footer>
+    // Contact Form Processing
     <div class="footer-container">
         <div class="social-icons">
             <a href="https://github.com/CristianBatero" target="_blank" class="social-icon">

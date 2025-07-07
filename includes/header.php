@@ -1,4 +1,5 @@
 <header>
+    // header.php - Contiene el encabezado del portafolio
     <div class="header-container">
         <div class="logo">
             <a href="#hero"><?php echo $nombre; ?></a>
