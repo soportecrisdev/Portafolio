@@ -263,9 +263,9 @@ if (contactForm) {
 // EmailJS implementation
 function enviarConEmailJS(nombre, email, mensaje, submitBtn, originalText, form) {
     // Replace with your EmailJS service ID, template ID, and user ID
-    const serviceID = 'YOUR_SERVICE_ID';
-    const templateID = 'YOUR_TEMPLATE_ID';
-    const userID = 'YOUR_USER_ID';
+    const serviceID = 'service_aq8x4tc';        // El que viste en pantalla
+    const templateID = 'template_XXXXXXX';      // El que obtengas del template
+    const userID = 'TU_PUBLIC_KEY_AQUI';        // El Public Key de tu cuenta
     
     const templateParams = {
         from_name: nombre,

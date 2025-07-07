@@ -114,6 +114,7 @@ function initializeFallbackAnimation() {
     let isDeleting = false;
     let charIndex = 0;
 
+// sourcery skip: avoid-function-declarations-in-blocks
     function typeWriter() {
         const fullText = texts[currentIndex];
         
